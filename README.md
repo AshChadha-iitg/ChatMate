@@ -1,2 +1,2 @@
 # ChatMate
-a friendly chatbot
+a friendly chatbot (better than gpt3.5)
