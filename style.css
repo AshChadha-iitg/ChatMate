@@ -51,6 +51,38 @@ body {
 
 .bot-message {
     background-color: #f5f5f5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.bot-message pre {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.bot-message code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.bot-message ul {
+    margin-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.bot-message li {
+    margin-bottom: 3px;
+}
+
+.bot-message strong {
+    font-weight: bold;
+}
+
+.bot-message em {
+    font-style: italic;
 }
 
 .chat-input {
