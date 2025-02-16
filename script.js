@@ -24,21 +24,17 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 contents: [{
+                    role: "user",
                     parts: [{
                         text: message
                     }]
-                }],
-                generationConfig: {
-                    temperature: 0.9,
-                    topK: 1,
-                    topP: 1,
-                    maxOutputTokens: 2048,
-                }
+                }]
             })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -47,17 +43,48 @@ async function sendMessage() {
             throw new Error('Invalid response from API');
         }
 
-        loadingMessage.textContent = data.candidates[0].content.parts[0].text;
+        const botResponse = data.candidates[0].content.parts[0].text;
+        
+        // Format and display the response
+        const formattedResponse = formatResponse(botResponse);
+        loadingMessage.innerHTML = formattedResponse;
     } catch (error) {
         console.error('Error:', error);
-        loadingMessage.textContent = `Error: ${error.message}. Please check your API key.`;
+        loadingMessage.textContent = `Error: ${error.message}`;
     }
+}
+
+function formatResponse(text) {
+    // Convert line breaks to HTML breaks
+    text = text.replace(/\n/g, '<br>');
+    
+    // Format code blocks
+    text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+    
+    // Format bold text
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Format italic text
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Format lists
+    text = text.replace(/^\s*[-*]\s+(.+)/gm, '<li>$1</li>');
+    text = text.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+    
+    return text;
 }
 
 function addMessageToChat(sender, message) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message', `${sender}-message`);
-    messageElement.textContent = message;
+    
+    // Use innerHTML for bot messages to render formatted HTML
+    if (sender === 'bot') {
+        messageElement.innerHTML = message;
+    } else {
+        messageElement.textContent = message;
+    }
+    
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     return messageElement;
