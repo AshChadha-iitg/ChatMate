@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatMate</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="2.css">
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h1>ChatMate</h1>
+            <h2>ChatMate</h2>
+            <button id="theme-toggle" aria-label="Toggle theme">
+                <span class="toggle-icon">🌙</span>
+            </button>
         </div>
         <div class="chat-messages" id="chat-messages">
             <!-- Messages will appear here -->
         </div>
         <div class="chat-input">
-            <textarea id="user-input" placeholder="Type your message here..."></textarea>
+            <input type="text" id="user-input" placeholder="Type your message...">
             <button id="send-button">Send</button>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="3.js"></script>
 </body>
-</html> 
+</html>
