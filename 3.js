@@ -1,7 +1,6 @@
-/* filepath: /c:/Users/Ashish/Desktop/My Projects/cursor ai/ChatMate/script.js */
 // Replace 'YOUR_API_KEY' with your actual Gemini API key
-const API_KEY = 'YOUR API KEY';
-const API_URL = 'YOUR API URL';
+const API_KEY = 'YOUR GEMINI API KEY';
+const API_URL = 'YOUR API URL (MODEL NAME)';
 
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
