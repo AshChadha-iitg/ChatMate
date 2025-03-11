@@ -1,5 +1,5 @@
 const API_KEY = 'YOUR GEMINI API KEY';
-const API_URL = 'YOUR API URL (MODEL NAME)';
+const API_URL = 'YOUR API URL/MODEL NAME (eg: gemini-2.0-flash)';
 
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
