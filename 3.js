@@ -1,4 +1,3 @@
-// Replace 'YOUR_API_KEY' with your actual Gemini API key
 const API_KEY = 'YOUR GEMINI API KEY';
 const API_URL = 'YOUR API URL (MODEL NAME)';
 
