@@ -1,20 +1,86 @@
-const API_KEY = 'AIzaSyCgsgybsh4GK8zy52Rz_mookvfDfC9wfr8';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+/* filepath: /c:/Users/Ashish/Desktop/My Projects/cursor ai/ChatMate/script.js */
+// Replace 'YOUR_API_KEY' with your actual Gemini API key
+const API_KEY = 'YOUR API KEY';
+const API_URL = 'YOUR API URL';
 
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const themeToggle = document.getElementById('theme-toggle');
+
+// Theme toggle functionality
+function initTheme() {
+    // Check if user has a saved preference
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.querySelector('.toggle-icon').textContent = '☀️';
+    } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.querySelector('.toggle-icon').textContent = '🌙';
+    }
+}
+
+function toggleTheme() {
+    if (document.body.classList.contains('light-theme')) {
+        // Switch to dark theme
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+        themeToggle.querySelector('.toggle-icon').textContent = '🌙';
+    } else {
+        // Switch to light theme
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        themeToggle.querySelector('.toggle-icon').textContent = '☀️';
+    }
+}
+
+// Initialize theme on page load
+initTheme();
+
+// Add event listener for theme toggle
+themeToggle.addEventListener('click', toggleTheme);
+
+function addMessage(message, isUser) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    
+    if (!isUser) {
+        // Convert markdown-style bold text (**text**) to HTML
+        message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert markdown headings (# text) to HTML
+        message = message.replace(/^(#{1,6})\s(.*)$/gm, (match, hashes, text) => {
+            const level = hashes.length;
+            return `<h${level}>${text}</h${level}>`;
+        });
+
+        // Wrap paragraphs in <p> tags
+        message = message
+            .split('\n\n') // Split on double newlines (paragraph breaks)
+            .map(para => para.trim()) // Trim whitespace
+            .filter(para => para.length > 0) // Remove empty paragraphs
+            .map(para => {
+                // Don't wrap headings in <p> tags
+                if (para.startsWith('<h')) return para;
+                return `<p>${para}</p>`;
+            })
+            .join('\n');
+    }
+    
+    messageDiv.innerHTML = message;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 async function sendMessage() {
     const message = userInput.value.trim();
     if (!message) return;
 
     // Add user message to chat
-    addMessageToChat('user', message);
+    addMessage(message, true);
     userInput.value = '';
-
-    // Show loading indicator
-    const loadingMessage = addMessageToChat('bot', 'Thinking...');
 
     try {
         const response = await fetch(`${API_URL}?key=${API_KEY}`, {
@@ -24,7 +90,6 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 contents: [{
-                    role: "user",
                     parts: [{
                         text: message
                     }]
@@ -34,67 +99,27 @@ async function sendMessage() {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+            throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
         }
 
         const data = await response.json();
         
-        if (!data.candidates || !data.candidates[0]) {
-            throw new Error('Invalid response from API');
+        if (data.candidates && data.candidates[0].content) {
+            const botResponse = data.candidates[0].content.parts[0].text;
+            addMessage(botResponse, false);
+        } else {
+            console.error('Unexpected API response:', data);
+            addMessage("Sorry, I couldn't process that request.", false);
         }
-
-        const botResponse = data.candidates[0].content.parts[0].text;
-        
-        // Format and display the response
-        const formattedResponse = formatResponse(botResponse);
-        loadingMessage.innerHTML = formattedResponse;
     } catch (error) {
         console.error('Error:', error);
-        loadingMessage.textContent = `Error: ${error.message}`;
+        addMessage("Sorry, there was an error processing your request. " + error.message, false);
     }
 }
 
-function formatResponse(text) {
-    // Convert line breaks to HTML breaks
-    text = text.replace(/\n/g, '<br>');
-    
-    // Format code blocks
-    text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-    
-    // Format bold text
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Format italic text
-    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // Format lists
-    text = text.replace(/^\s*[-*]\s+(.+)/gm, '<li>$1</li>');
-    text = text.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
-    
-    return text;
-}
-
-function addMessageToChat(sender, message) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message', `${sender}-message`);
-    
-    // Use innerHTML for bot messages to render formatted HTML
-    if (sender === 'bot') {
-        messageElement.innerHTML = message;
-    } else {
-        messageElement.textContent = message;
-    }
-    
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return messageElement;
-}
-
-// Event listeners
 sendButton.addEventListener('click', sendMessage);
 userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
+    if (e.key === 'Enter') {
         sendMessage();
     }
-}); 
+});
